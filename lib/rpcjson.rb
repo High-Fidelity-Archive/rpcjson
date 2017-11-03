@@ -101,7 +101,7 @@ class RPC
           else
             # No standard for < 2.0 error objects.
             # Bitcoind is 1.1 and seems to follow 2.0 standard, other clients?
-            raise Error.new(answer['error']), 'JSON-RPC Error'
+            raise Error.new(answer['error']), answer['error']['message'] || 'JSON-RPC Error'
           end
         end
 
