@@ -16,23 +16,18 @@ class RPC
         @id = SecureRandom.uuid
         @uri = URI.parse(url)
         @version = version
-        @connections = 0
-        @http = Net::HTTP.start(@uri.host, @uri.port)
       end
 
       def make_request(body)
-        @connections += 1
-        if @connections > 2000
-          @http.finish
-          @http = Net::HTTP.start(@uri.host, @uri.port)
+        Net::HTTP.start(@uri.host, @uri.port) do |http|
+          request = Net::HTTP::Post.new(@uri.request_uri)
+          if @uri.user != nil
+            request.basic_auth(@uri.user, @uri.password)
+          end
+          request.body = body
+          response = http.request(request)
+          JSON( response.body )
         end
-        request = Net::HTTP::Post.new(@uri.request_uri)
-        if @uri.user != nil
-          request.basic_auth(@uri.user, @uri.password)
-        end
-        request.body = body
-        response = @http.request(request)
-        JSON( response.body )
       end
 
       def method_missing(func, *args)
